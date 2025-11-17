@@ -5,3 +5,9 @@ __pycache__/
 *.pyd
 *.swp
 .DS_Store
+
+# Ignore temporary runner file
+tempCodeRunnerFile.py
+
+# Ignore compiled __init__ (optionnel si tu veux cacher juste le pyc)
+__init__.py
