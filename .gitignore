@@ -1,0 +1,7 @@
+# Fichiers système ou temporaires
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.swp
+.DS_Store
