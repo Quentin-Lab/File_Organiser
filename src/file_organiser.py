@@ -52,10 +52,10 @@ def main():
             safe_path = file_ops.resolve_file_conflict(file_path, destination_folder)
             try:
                 file_ops.move_file(file_path, safe_path)
-                log.log_event(log_file,f"The file {file_path} has been successfully moved toward : {safe_path}")
+                log.log_event(log_file,f"The file {file_path} has been successfully moved toward : {safe_path}",type="MOVE")
                 stats[destination_folder.name] += 1
             except Exception as e:
-                log.log_event(log_file,f"The file {file_path} has not been moved. Error:{e}")
+                log.log_event(log_file,f"The file {file_path} has not been moved. Error:{e}",type="ERROR")
 
     ui.display_summary(stats)
 

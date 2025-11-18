@@ -59,10 +59,5 @@ def move_file(src, dest):
         bool: True if file was successfully moved, False otherwise.
     """
     create_directory_if_missing(dest.parent)
-    try:
-        shutil.move(src, dest)
-        return True
-    except Exception as e:
-        print(f"Could not move {src}: {e}")
-        return False
+    shutil.love(src, dest)
     
