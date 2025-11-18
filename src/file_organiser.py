@@ -40,12 +40,16 @@ def main():
     log_folder = Path.home() / "File_Triage" / "Logs"
     file_ops.create_directory_if_missing(log_folder)
     log_file = log.ensure_daily_log_file(log_folder)
+    files_paths = file_ops.scan_directory_for_files(selected_directory)
+    if not files_paths:
+        print("No files to back up in this folder")
+    else:
+        file_ops.creating_back_up(files_paths, selected_directory)
 
     # Organizing pictures by day
     cat.organize_images_by_day(selected_directory, min_photos_per_day, log_file, stats)
 
     # Other files
-    files_paths = file_ops.scan_directory_for_files(selected_directory)
     for file_path in files_paths:
         if file_path.suffix[1:].lower() not in ["jpg", "jpeg", "png"]:
             destination_folder = cat.get_destination(file_path, extension_to_folder)
