@@ -1,23 +1,20 @@
 from pathlib import Path
 from utils.date_utils import get_date_taken
+from collections import defaultdict
 
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
 MIN_PHOTO_PER_DAY = 5
 
+# Determine the number of image in a file list regarding IMAGE_EXTENSIONS.
 def count_image_in_list(files_list):
     """
     Determine the number of image in a file list regarding IMAGE_EXTENSIONS.
-
     Args: 
         files_list (Path): a list with path.
     Returns:
         The number of image in this list.
     """
-    counter = 0
-    for file in files_list:
-        if file.suffix[1:].lower() in IMAGE_EXTENSIONS:
-            counter +=1
-    return counter
+    return sum(1 for f in files_list if f.suffix[1:].lower() in IMAGE_EXTENSIONS)
 
 def count_image_in_directory(directory, target_date, mode="day"):
     """
@@ -47,16 +44,12 @@ def count_image_in_directory(directory, target_date, mode="day"):
     return count
 
 def group_image_by_day(directory):
-    image_by_day = {}
-    for file in directory.iterdir():
-        if file.is_file() and file.suffix[1:].lower() in IMAGE_EXTENSIONS:
-            date_taken = get_date_taken(file)
-            if date_taken is None:
-                continue
-            day_key = date_taken.date()
-            if day_key not in image_by_day:
-                image_by_day[day_key] = []
-            image_by_day[day_key].append(file)
+    image_by_day = defaultdict(list)
+    for f in directory.iterdir():
+        if f.is_file() and f.suffix[1:].lower() in IMAGE_EXTENSIONS:
+            date_taken = get_date_taken(f)
+            if date_taken:
+                image_by_day[date_taken.date()].append(f)
     return image_by_day
 
 
@@ -108,6 +101,6 @@ def organize_images_by_day(selected_directory, min_photos_per_day, log_file, sta
             try:
                 move_file(file_path, safe_path)
                 log.log_event(log_file, f"The file {file_path} has been successfully moved toward : {safe_path}")
-                stats[destination_folder.name] += 1
+                stats[base_folder.name] += 1
             except Exception as e:
                 log.log_event(log_file, f"The file {file_path} has not been moved. Error:{e}")

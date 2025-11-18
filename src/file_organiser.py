@@ -53,7 +53,7 @@ def main():
             try:
                 file_ops.move_file(file_path, safe_path)
                 log.log_event(log_file,f"The file {file_path} has been successfully moved toward : {safe_path}")
-                stats[safe_path.parent.name] += 1
+                stats[destination_folder.name] += 1
             except Exception as e:
                 log.log_event(log_file,f"The file {file_path} has not been moved. Error:{e}")
 
