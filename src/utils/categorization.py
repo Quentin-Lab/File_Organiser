@@ -1,6 +1,7 @@
 from pathlib import Path
 from utils.date_utils import get_date_taken
 from collections import defaultdict
+import json
 
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
 MIN_PHOTO_PER_DAY = 5
@@ -52,7 +53,6 @@ def group_image_by_day(directory):
                 image_by_day[date_taken.date()].append(f)
     return image_by_day
 
-
 def get_destination(file_path, extension_to_folder):
     """
     Determine the destination folder for a non-image file based on its extension.
@@ -73,6 +73,7 @@ def get_destination(file_path, extension_to_folder):
     return home_path / "File_Triage" / "Autres"
 
 def organize_images_by_day(selected_directory, min_photos_per_day, log_file, stats):
+
     from utils.categorization import group_image_by_day
     from utils.file_ops import resolve_file_conflict, move_file, create_directory_if_missing
     from utils.date_utils import get_date_taken
@@ -100,7 +101,48 @@ def organize_images_by_day(selected_directory, min_photos_per_day, log_file, sta
             safe_path = resolve_file_conflict(file_path, destination_folder)
             try:
                 move_file(file_path, safe_path)
-                log.log_event(log_file, f"The file {file_path} has been successfully moved toward : {safe_path}")
+                log.log_event(log_file, f"The file {file_path} has been successfully moved toward : {safe_path}", type="MOVE")
                 stats[base_folder.name] += 1
             except Exception as e:
-                log.log_event(log_file, f"The file {file_path} has not been moved. Error:{e}")
+                log.log_event(log_file, f"The file {file_path} has not been moved. Error:{e}", type="ERROR")
+
+def get_rules(json_path: Path):
+    """
+    Load categorization rules from a JSON file.
+
+    Args:
+        json_path (Path): Path to the JSON file containing the rules.
+
+    Returns:
+        dict: A dictionary of rules where each key is a category
+              and each value is a list of associated keywords.
+              
+    Example:
+        rules = get_rules(Path("rules.json"))
+        # rules = {"payslip": ["paie", "fiche_paie"], "work_contract": ["contrat_travail"]}
+    """
+    with json_path.open(encoding="utf-8") as f:
+        rules = json.load(f)
+    return rules   
+
+def get_category(file_name: str, rules_dict:dict):
+    """
+    Determine the category of a file by matching its name against keywords.
+
+    Args:
+        file_name (str): The file name to categorize.
+        rules_dict (dict): Dictionary of rules, typically loaded with get_rules().
+
+    Returns:
+        str | None: The category matching the file if any keyword matches,
+                    None otherwise.
+
+    Example:
+        category = get_category("fiche_paie_fevrier_2025.pdf", rules)
+        # category -> "payslip"
+    """
+    for category, keywords in rules_dict.items():
+        if any(k.lower() in file_name.lower() for k in keywords):
+            print(f"Categorie détectée :{category}")
+            return category
+    return None
