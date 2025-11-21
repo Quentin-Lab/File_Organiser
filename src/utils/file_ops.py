@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import zipfile
+import json
 
 def scan_directory_for_files(directory):
     """
@@ -86,3 +87,7 @@ def creating_back_up(files_list, backup_folder):
 
     print(f"Backup created: {archive_name}")
 
+def get_rules(json_path: Path):
+    with json_path.open(encoding="utf-8") as f:
+        rules = json.load(f)
+    return rules   
