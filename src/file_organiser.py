@@ -83,7 +83,14 @@ def main():
             file_ops.move_file(file_path, safe_path)
             log.log_event(log_file,
                             f"The file {file_path} has been successfully moved toward : {safe_path}",type="MOVE")
-            stats[destination_folder.name] += 1
+            
+            if category and category in category_to_folder:
+                stats_key = category_to_folder[category].name
+                stats[stats_key] +=1
+            else:
+                stats_key = destination_folder.name
+            stats[stats_key.name] += 1
+
         except Exception as e:
                 log.log_event(log_file,
                             f"The file {file_path} has not been moved. Error:{e}",type="ERROR")
