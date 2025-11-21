@@ -2,6 +2,7 @@ from pathlib import Path
 from utils.date_utils import get_date_taken
 from collections import defaultdict
 import json
+import re
 import unicodedata
 
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
@@ -142,8 +143,9 @@ def get_category(file_name: str, rules_dict:dict):
         category = get_category("fiche_paie_fevrier_2025.pdf", rules)
         # category -> "payslip"
     """
+    normalized_file_name = normalize_name(file_name)
     for category, keywords in rules_dict.items():
-        if any(k.lower() in file_name.lower() for k in keywords):
+        if any(normalize_name(k).lower() in normalized_file_name.lower() for k in keywords):
             return category
     return None
 
@@ -161,3 +163,11 @@ def normalize_name(file_name):
             cleaned_file_name += c
     return cleaned_file_name.lower().replace(' ','_').replace('-','_').replace("'",'_')
     
+def extract_year_from_filename(file_name: str):
+    """
+    look if a year is precised in the file_name and extract it.
+    """
+    match = re.search(r'(?<!\d)(19|20)\d{2}(?!\d)', file_name)
+    if match:
+        return match.group(0)
+    return None

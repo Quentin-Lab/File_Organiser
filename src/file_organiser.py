@@ -46,9 +46,6 @@ def main():
     else:
         file_ops.creating_back_up(files_paths, selected_directory)
 
-    # Organizing pictures by day
-    cat.organize_images_by_day(selected_directory, min_photos_per_day, log_file, stats)
-
     # Load rules from JSON
     rules_path = Path(cat.__file__).parent / "rules.json"
     rules = cat.get_rules(rules_path)
@@ -60,32 +57,42 @@ def main():
         
     }
 
-    # Other files
+    # Files
     for file_path in files_paths:
-        if file_path.suffix[1:].lower() not in ["jpg", "jpeg", "png"]:
 
-            #Detect category
-            category = cat.get_category(file_path.name, rules)
+         #Detect category
+        category = cat.get_category(file_path.name, rules)
+            
+        # Priority: category-based destination
+        date_for_folder = cat.extract_year_from_filename(file_path.name)
 
-            # Priority: category-based destination
-            if category and category in category_to_folder:
-                destination_folder = Path.home() / category_to_folder[category]
-
+        if category and category in category_to_folder:
+            if category == "payslip":
+                if date_for_folder:
+                    destination_folder = Path.home() / category_to_folder[category] / date_for_folder
+                else:
+                    destination_folder = Path.home() / category_to_folder[category] / "Unknown"
             else:
-                #extension-based.
-                destination_folder = cat.get_destination(file_path, extension_to_folder)
-            safe_path = file_ops.resolve_file_conflict(file_path, destination_folder)
-            try:
-                file_ops.move_file(file_path, safe_path)
+                destination_folder = Path.home() / category_to_folder[category]
+        else:
+            #extension-based.
+            destination_folder = cat.get_destination(file_path, extension_to_folder)
+        
+        safe_path = file_ops.resolve_file_conflict(file_path, destination_folder)
+        try:
+            file_ops.move_file(file_path, safe_path)
+            log.log_event(log_file,
+                            f"The file {file_path} has been successfully moved toward : {safe_path}",type="MOVE")
+            stats[destination_folder.name] += 1
+        except Exception as e:
                 log.log_event(log_file,
-                              f"The file {file_path} has been successfully moved toward : {safe_path}",type="MOVE")
-                stats[destination_folder.name] += 1
-            except Exception as e:
-                    log.log_event(log_file,
-                                  f"The file {file_path} has not been moved. Error:{e}",type="ERROR")
+                            f"The file {file_path} has not been moved. Error:{e}",type="ERROR")
+    # Organizing pictures by day
+    cat.organize_images_by_day(selected_directory, min_photos_per_day, log_file, stats)
+
 
     ui.display_summary(stats)
-
+3
 # --- Programme --- 
 
 if __name__ == "__main__":
