@@ -1,3 +1,5 @@
 {
-	"payslip": ["fiche_paie","bulletin_salaire"]
+	"payslip": ["fiche_paie","bulletin_salaire"],
+	"resume": ["CV","lettre_motivation","lebenslauf"],
+	"identity": ["CNI","Passeport","Führerschein","personalausweis"]
 }

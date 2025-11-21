@@ -2,6 +2,7 @@ from pathlib import Path
 from utils.date_utils import get_date_taken
 from collections import defaultdict
 import json
+import unicodedata
 
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
 MIN_PHOTO_PER_DAY = 5
@@ -143,6 +144,20 @@ def get_category(file_name: str, rules_dict:dict):
     """
     for category, keywords in rules_dict.items():
         if any(k.lower() in file_name.lower() for k in keywords):
-            print(f"Categorie détectée :{category}")
             return category
     return None
+
+def normalize_name(file_name):
+    """
+    Remove accent é => e
+    Replace " ", "-" with "_"
+    Lower everything : "AzerTy" => "azerty"
+    return the file_name normalized.
+    """
+    decomposed_file_name = unicodedata.normalize("NFD", file_name)
+    cleaned_file_name = ""
+    for c in decomposed_file_name:
+        if unicodedata.category(c) != "Mn":
+            cleaned_file_name += c
+    return cleaned_file_name.lower().replace(' ','_').replace('-','_').replace("'",'_')
+    
